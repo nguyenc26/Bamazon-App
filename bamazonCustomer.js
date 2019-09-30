@@ -65,18 +65,31 @@ function buyStuff() {
         }
     }]).then(function (answer) {
         connection.query("SELECT * FROM products WHERE item_id=?", answer.itemID, function (err, res) {
-            if (answer.howMany > res[0].stock_quantity) {
+            var newStock = (res[0].stock_quantity - answer.howMany);
+
+            for (var i = 0; i < res.length; i++) {
+            if (answer.howMany > res[i].stock_quantity) {
                 console.log('Insufficient Quantity');
                 newOrder();
             } else {
                 console.log("===================================" + "\nAwesome! We have that in stock!" + "\n===================================");
                 console.log("You've selected:");
-                console.log("Item: " + res[0].product_name + "\nDepartment: " + res[0].department_name + "\nPrice: " + res[0].price + "\nQuantity: " + answer.howMany);
-                console.log("Total: " + res[0].price * answer.howMany + "\n===================================");
-                connection.end();
+                console.log("Item: " + res[i].product_name + "\nDepartment: " + res[i].department_name + "\nPrice: " + res[i].price + "\nQuantity: " + answer.howMany);
+                console.log("Total: " + res[i].price * answer.howMany + "\n===================================" + "\nThank you or shopping at Bamazon!" + "\n===================================");
+                //console.log(newStock);
+                function updateStock () {
+                    connection.query("UPDATE products SET ? WHERE ?", [{
+                        stock_quantity: newStock 
+                    }, {
+                        item_id: answer.itemID
+                    }
+                    ])
+                }
+                updateStock();
+                newOrder();
             }
 
-        })
+        }})
 
     })
 }
@@ -87,8 +100,9 @@ function newOrder() {
         name: 'choice',
         message: 'Would you like to place another order?'
     }]).then(function (answer) {
-        if (answer.choice) {
-            buyStuff();
+        if (answer.choice) { 
+            //figure out this situation below. LOL 
+            displayTable().then(buyStuff());
         }
         else {
             console.log('Thank you for shopping at Bamazon!');
