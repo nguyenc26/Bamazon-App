@@ -2,7 +2,8 @@ require("dotenv").config();
 
 var mysql = require('mysql');
 var inquirer = require('inquirer');
-var Table = require("cli-table");
+const cTable = require("console.table");
+
 
 var keys = require("./keys.js");
 
@@ -17,27 +18,30 @@ var connection = mysql.createConnection({
 connection.connect(function (err) {
     if (err) throw err;
     console.log("Connection successful " + connection.threadId);
-    displayTable();
+    consoleTable();
 });
 
-function displayTable() {
-    var table = new Table({
-        head: ["Item ID", "Product Name", "Department Name", "Price", "Quantity"],
-        colWidths: [10, 30, 30, 10, 15]
-    });
-    listItems();
+function consoleTable() {
+    connection.query("SELECT item_id, product_name, price, stock_quantity FROM products", function (error, data) {
+        if (error) throw error;
+        console.table("\n-----------------------" + "Products" + "------------------------", data);
+        newOrder();
+    })
+}
 
-    function listItems() {
-        connection.query("SELECT * FROM products", function (err, res) {
-            if (err) throw err;
-
-            for (var i = 0; i < res.length; i++) {
-                table.push([res[i].item_id, res[i].product_name, res[i].department_name, `$${res[i].price}`, res[i].stock_quantity]);
-            }
-            console.log(table.toString() + "\n");
+function newOrder() {
+    inquirer.prompt([{
+        type: "confirm",
+        name: "choice",
+        message: "Would you like to place an order?"
+    }]).then(function (answer) {
+        if (answer.choice) {
             buyStuff();
-        });
-    }
+        } else {
+            console.log('Thank you for shopping at Bamazon!');
+            connection.end();
+        }
+    })
 }
 
 
@@ -68,45 +72,29 @@ function buyStuff() {
             var newStock = (res[0].stock_quantity - answer.howMany);
 
             for (var i = 0; i < res.length; i++) {
-            if (answer.howMany > res[i].stock_quantity) {
-                console.log('Insufficient Quantity');
-                newOrder();
-            } else {
-                console.log("===================================" + "\nAwesome! We have that in stock!" + "\n===================================");
-                console.log("You've selected:");
-                console.log("Item: " + res[i].product_name + "\nDepartment: " + res[i].department_name + "\nPrice: " + res[i].price + "\nQuantity: " + answer.howMany);
-                console.log("Total: " + res[i].price * answer.howMany + "\n===================================" + "\nThank you or shopping at Bamazon!" + "\n===================================");
-                //console.log(newStock);
-                function updateStock () {
-                    connection.query("UPDATE products SET ? WHERE ?", [{
-                        stock_quantity: newStock 
-                    }, {
-                        item_id: answer.itemID
+                if (answer.howMany > res[i].stock_quantity) {
+                    console.log('Insufficient Quantity');
+                    buyStuff();
+                } else {
+                    console.log("===================================" + "\nAwesome! We have that in stock!" + "\n===================================");
+                    console.log("You've selected:");
+                    console.log("Item: " + res[i].product_name + "\nDepartment: " + res[i].department_name + "\nPrice: " + res[i].price + "\nQuantity: " + answer.howMany);
+                    console.log("Total: " + res[i].price * answer.howMany + "\n===================================" + "\nThank you or shopping at Bamazon!" + "\n===================================");
+                    //console.log(newStock);
+                    function updateStock() {
+                        connection.query("UPDATE products SET ? WHERE ?", [{
+                            stock_quantity: newStock
+                        }, {
+                            item_id: answer.itemID
+                        }
+                        ])
                     }
-                    ])
+                    updateStock();
+                    consoleTable();
                 }
-                updateStock();
-                newOrder();
-            }
 
-        }})
+            }
+        })
 
     })
 }
-
-function newOrder() {
-    inquirer.prompt([{
-        type: 'confirm',
-        name: 'choice',
-        message: 'Would you like to place another order?'
-    }]).then(function (answer) {
-        if (answer.choice) { 
-            //figure out this situation below. LOL 
-            displayTable().then(buyStuff());
-        }
-        else {
-            console.log('Thank you for shopping at Bamazon!');
-            connection.end();
-        }
-    })
-};
