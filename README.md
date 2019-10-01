@@ -10,4 +10,4 @@ Simple command line storefront with a [**Customer**] functionality that allows u
 
 ## Demo 
 
-![Customer Demo](Demos\demo1.gif)
+![Customer Demo](https://media.giphy.com/media/dCKuenublVhoPVfhzH/giphy.gif)
