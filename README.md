@@ -10,4 +10,6 @@ Simple command line storefront with a [**Customer**] functionality that allows u
 
 ## Demo 
 
-![Customer Demo](https://media.giphy.com/media/dCKuenublVhoPVfhzH/giphy.gif)
+![Customer Demo](<img src="https://media.giphy.com/media/dCKuenublVhoPVfhzH/giphy.gif" height= "250px"/>)
+
+![Customer Demo]<img src="https://media.giphy.com/media/dCKuenublVhoPVfhzH/giphy.gif" height= "250px"/>
