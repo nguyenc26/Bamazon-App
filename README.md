@@ -10,8 +10,8 @@ Simple command line storefront with a [**Customer**] functionality that allows u
 
 ## Demo 
 
-![Customer Demo](../Demos/demo1.webm)
+![Customer Demo](../Demos\demo1.mp4)
 
-![Customer Demo](/Demos/demo1.webm)
+![Customer Demo](/Demos\demo1.mp4)
 
-![Customer Demo](Demos/demo1.webm)
+![Customer Demo](Demos\demo1.mp4)
